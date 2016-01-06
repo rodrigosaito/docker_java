@@ -12,12 +12,14 @@ ENV JAVA_HOME ${JAVA_BASE_PATH}/jdk
 ENV PATH ${PATH}:${JAVA_HOME}/bin
 
 # Install Java
-RUN apk --update add curl ca-certificates tar && \
+RUN apk --update --virtual=build-dependencies add curl ca-certificates tar && \
     curl -Ls https://circle-artifacts.com/gh/andyshinn/alpine-pkg-glibc/6/artifacts/0/home/ubuntu/alpine-pkg-glibc/packages/x86_64/glibc-2.21-r2.apk > /tmp/glibc-2.21-r2.apk && \
     apk add --allow-untrusted /tmp/glibc-2.21-r2.apk && \
+    /usr/glibc/usr/bin/ldconfig "/lib" "/usr/glibc/usr/lib" && \
+    echo 'hosts: files mdns4_minimal [NOTFOUND=return] dns mdns4' >> /etc/nsswitch.conf && \
     mkdir $JAVA_BASE_PATH && curl -jksSLH "Cookie: oraclelicense=accept-securebackup-cookie"\
-  http://download.oracle.com/otn-pub/java/jdk/${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-b${JAVA_VERSION_BUILD}/${JAVA_PACKAGE}-${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-linux-x64.tar.gz \
-    | tar -xzf - -C $JAVA_BASE_PATH &&\
+      http://download.oracle.com/otn-pub/java/jdk/${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-b${JAVA_VERSION_BUILD}/${JAVA_PACKAGE}-${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-linux-x64.tar.gz \
+      | tar -xzf - -C $JAVA_BASE_PATH &&\
     ln -s $JAVA_BASE_PATH/jdk1.${JAVA_VERSION_MAJOR}.0_${JAVA_VERSION_MINOR} $JAVA_HOME &&\
     rm -rf $JAVA_HOME/*src.zip \
            $JAVA_HOME/lib/missioncontrol \
@@ -38,4 +40,5 @@ RUN apk --update add curl ca-certificates tar && \
            $JAVA_HOME/jre/lib/amd64/libglass.so \
            $JAVA_HOME/jre/lib/amd64/libgstreamer-lite.so \
            $JAVA_HOME/jre/lib/amd64/libjavafx*.so \
-           $JAVA_HOME/jre/lib/amd64/libjfx*.so
+           $JAVA_HOME/jre/lib/amd64/libjfx*.so \
+    && apk del build-dependencies
