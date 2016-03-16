@@ -11,4 +11,4 @@ RUN apk --update --virtual=build-dependencies add curl ca-certificates tar \
   && ln -s $MAVEN_BASE_PATH/apache-maven-$MAVEN_VERSION $MAVEN_BASE_PATH/maven \
   && apk del build-dependencies
 
-ENTRYPOINT mvn
+ENTRYPOINT [ "mvn" ]
